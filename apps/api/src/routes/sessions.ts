@@ -95,12 +95,6 @@ export async function sessionsRoutes(app: FastifyInstance) {
     if (!deviceProfile || !deviceProfile.isEnabled) throw new NotFoundError("Device profile");
 
     const plan = PLAN_DEFINITIONS[subscription?.plan ?? "FREE"];
-    const concurrentCount = await prisma.session.count({
-      where: { organizationId: project.organizationId, status: { in: ["CREATING", "BOOTING", "INSTALLING", "STARTING", "RUNNING"] } },
-    });
-    if (concurrentCount >= plan.maxConcurrentSessions) {
-      throw new ConflictError(`Plan limit reached: ${plan.name} allows ${plan.maxConcurrentSessions} concurrent session(s)`);
-    }
     if (subscription && plan.deviceMinutesPerMonth !== null && subscription.deviceMinutesUsed >= plan.deviceMinutesPerMonth) {
       throw new ConflictError(`Plan limit reached: ${plan.name} includes ${plan.deviceMinutesPerMonth} device-minutes/month`);
     }
